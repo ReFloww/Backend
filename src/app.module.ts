@@ -7,6 +7,8 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
 import { HistoryModule } from './history/history.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
     imports: [
@@ -20,6 +22,8 @@ import { BlockchainModule } from './blockchain/blockchain.module';
         PortfolioModule,
         HistoryModule,
         BlockchainModule,
+        UsersModule,
+        AuthModule,
     ],
     controllers: [],
     providers: [],
