@@ -4,7 +4,134 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+}
+
+model Ownership {
+  id                 String  @id
+  contract_address   String
+  user               String
+  balance            Decimal @db.Decimal(78, 0)
+  last_updated       Decimal @db.Decimal(78, 0)
+  last_updated_block Decimal @db.Decimal(78, 0)
+  product_id         String
+
+  @@map("ownership")
+}
+
+model ProductOnchain {
+  id                     String  @id
+  sequence_id            Decimal @db.Decimal(78, 0)
+  contract_address       String
+  name                   String
+  symbol                 String
+  max_supply             Decimal @db.Decimal(78, 0)
+  total_supply           Decimal @db.Decimal(78, 0)
+  factory_address        String
+  created_at             Decimal @db.Decimal(78, 0)
+  created_at_block       Decimal @db.Decimal(78, 0)
+  created_at_transaction String
+  holder_count           Decimal @db.Decimal(78, 0)
+
+  @@map("product_onchain")
+}
+
+model TransactionLogs {
+  id               String  @id
+  contract_address String
+  user             String
+  type             String
+  token_amount     Decimal @db.Decimal(78, 0)
+  usdt_amount      Decimal @db.Decimal(78, 0)
+  timestamp        Decimal @db.Decimal(78, 0)
+  block_number     Decimal @db.Decimal(78, 0)
+  transaction_hash String
+  log_index        Decimal @db.Decimal(78, 0)
+
+  @@map("transaction_logs")
+}
+
+model ponder_checkpoint {
+  chain_name           String @id
+  chain_id             BigInt
+  safe_checkpoint      String @db.VarChar(75)
+  latest_checkpoint    String @db.VarChar(75)
+  finalized_checkpoint String @db.VarChar(75)
+
+  @@map("_ponder_checkpoint")
+}
+
+model ponder_meta {
+  key   String @id
+  value Json
+
+  @@map("_ponder_meta")
+}
+
+model reorg__ownership {
+  id                 String
+  contract_address   String
+  user               String
+  balance            Decimal @db.Decimal(78, 0)
+  last_updated       Decimal @db.Decimal(78, 0)
+  last_updated_block Decimal @db.Decimal(78, 0)
+  product_id         String
+  operation_id       Int     @id @default(autoincrement())
+  operation          Int
+  checkpoint         String  @db.VarChar(75)
+
+  @@index([checkpoint], map: "ownership_checkpoint_index")
+  @@map("_reorg__ownership")
+}
+
+model reorg__product_onchain {
+  id                     String
+  sequence_id            Decimal @db.Decimal(78, 0)
+  contract_address       String
+  name                   String
+  symbol                 String
+  max_supply             Decimal @db.Decimal(78, 0)
+  total_supply           Decimal @db.Decimal(78, 0)
+  factory_address        String
+  created_at             Decimal @db.Decimal(78, 0)
+  created_at_block       Decimal @db.Decimal(78, 0)
+  created_at_transaction String
+  holder_count           Decimal @db.Decimal(78, 0)
+  operation_id           Int     @id @default(autoincrement())
+  operation              Int
+  checkpoint             String  @db.VarChar(75)
+
+  @@index([checkpoint], map: "product_onchain_checkpoint_index")
+  @@map("_reorg__product_onchain")
+}
+
+model reorg__transaction_logs {
+  id               String
+  contract_address String
+  user             String
+  type             String
+  token_amount     Decimal @db.Decimal(78, 0)
+  usdt_amount      Decimal @db.Decimal(78, 0)
+  timestamp        Decimal @db.Decimal(78, 0)
+  block_number     Decimal @db.Decimal(78, 0)
+  transaction_hash String
+  log_index        Decimal @db.Decimal(78, 0)
+  operation_id     Int     @id @default(autoincrement())
+  operation        Int
+  checkpoint       String  @db.VarChar(75)
+
+  @@index([checkpoint], map: "transaction_logs_checkpoint_index")
+  @@map("_reorg__transaction_logs")
+}
+
+model User {
+  id            String  @id @default(uuid())
+  email         String  @unique
+  password      String
+  username      String  @unique
+  name          String?
+  walletAddress String?
+
+  @@map("users")
 }
 
 model Contract {
@@ -17,12 +144,12 @@ model Contract {
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  productName String
-  categoryId  String
-  description String
-  loanInterest Decimal @db.Decimal(5, 2)
-  loanAmount   Decimal @db.Decimal(20, 2)
+  id           String   @id @default(uuid())
+  productName  String
+  categoryId   String
+  description  String
+  loanInterest Decimal  @db.Decimal(5, 2)
+  loanAmount   Decimal  @db.Decimal(20, 2)
   loanTenor    Int
   creditRate   String
   contractId   String
