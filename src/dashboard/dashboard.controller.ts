@@ -1,9 +1,13 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
+import { DashboardService } from './dashboard.service';
 
 @Controller('dashboard')
 export class DashboardController {
-    @Get()
-    getDashboard() {
-        return { message: 'Dashboard API not implemented yet' };
-    }
+  constructor(private readonly dashboardService: DashboardService) {}
+
+  @Get()
+  async getDashboard(@Query('wallet') wallet?: string) {
+    const userWallet = wallet ?? '0xMOCK_USER_WALLET';
+    return this.dashboardService.getDashboard(userWallet);
+  }
 }

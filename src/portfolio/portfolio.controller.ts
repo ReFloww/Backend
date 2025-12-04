@@ -1,9 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
+import { PortfolioService } from './portfolio.service';
 
 @Controller('portfolio')
 export class PortfolioController {
-    @Get()
+    constructor(private readonly portfolioService: PortfolioService) {}
+
+    @Get('/data')
     getPortfolio() {
-        return { message: 'Portfolio API stub – not implemented yet' };
+        return this.portfolioService.getPortfolioData();
     }
 }
