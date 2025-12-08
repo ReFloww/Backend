@@ -53,4 +53,44 @@ export class MarketService {
             },
         });
     }
+
+    async getMarketList() {
+        // Get all product_onchain records
+        const productsOnchain = await this.prisma.productOnchain.findMany();
+
+        // For each product, join with metadata
+        const marketList = await Promise.all(
+            productsOnchain.map(async (onchain) => {
+                const metadata = await this.prisma.productMetadata.findUnique({
+                    where: { id: parseInt(onchain.sequence_id.toString()) },
+                });
+
+                return {
+                    // Onchain data
+                    id: onchain.id,
+                    sequenceId: onchain.sequence_id,
+                    contractAddress: onchain.contract_address,
+                    name: onchain.name,
+                    symbol: onchain.symbol,
+                    maxSupply: onchain.max_supply,
+                    totalSupply: onchain.total_supply,
+                    factoryAddress: onchain.factory_address,
+                    createdAt: onchain.created_at,
+                    createdAtBlock: onchain.created_at_block,
+                    createdAtTransaction: onchain.created_at_transaction,
+                    holderCount: onchain.holder_count,
+
+                    // Metadata
+                    description: metadata?.description || null,
+                    loanInterest: metadata?.loanInterest || null,
+                    loanAmount: metadata?.loanAmount || null,
+                    creditRate: metadata?.creditRate || null,
+                    categoryId: metadata?.categoryId || null,
+                    loanTenor: metadata?.loanTenor || null,
+                };
+            })
+        );
+
+        return marketList;
+    }
 }

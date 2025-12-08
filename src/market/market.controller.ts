@@ -2,10 +2,11 @@ import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { MarketService } from './market.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { CreateContractDto } from './dto/create-contract.dto';
+import { MarketListResponseDto } from './dto/market-list-response.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('Market')
-@Controller()
+@Controller('market')
 export class MarketController {
     constructor(private readonly marketService: MarketService) { }
 
@@ -44,5 +45,16 @@ export class MarketController {
     @ApiResponse({ status: 200, description: 'Return all products.' })
     findAllProducts() {
         return this.marketService.findAllProducts();
+    }
+
+    @Get('list')
+    @ApiOperation({ summary: 'Get market list with combined product data' })
+    @ApiResponse({
+        status: 200,
+        description: 'Return all products with onchain and metadata combined.',
+        type: [MarketListResponseDto]
+    })
+    getMarketList() {
+        return this.marketService.getMarketList();
     }
 }

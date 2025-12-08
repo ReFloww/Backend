@@ -9,6 +9,7 @@ import { HistoryModule } from './history/history.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { AutoManageModule } from './auto-manage/auto-manage.module';
 
 @Module({
     imports: [
@@ -24,6 +25,7 @@ import { AuthModule } from './auth/auth.module';
         BlockchainModule,
         UsersModule,
         AuthModule,
+        AutoManageModule,
     ],
     controllers: [],
     providers: [],

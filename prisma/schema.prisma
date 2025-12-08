@@ -11,6 +11,7 @@ model Ownership {
   id                 String  @id
   contract_address   String
   user               String
+  type               String
   balance            Decimal @db.Decimal(78, 0)
   last_updated       Decimal @db.Decimal(78, 0)
   last_updated_block Decimal @db.Decimal(78, 0)
@@ -36,13 +37,62 @@ model ProductOnchain {
   @@map("product_onchain")
 }
 
+model ProductMetadata {
+  id           Int      @id @default(autoincrement())
+  description  String?
+  loanInterest Decimal? @db.Decimal(5, 2)
+  loanAmount   Decimal? @db.Decimal(20, 2)
+  creditRate   String?
+  categoryId   String?
+  loanTenor    Int?
+
+  @@map("product_metadata")
+}
+
+model ManagerOnchain {
+  id                  String  @id
+  sequence_id         Decimal @db.Decimal(78, 0)
+  contract_address    String
+  name                String
+  owner               String
+  created_at          Decimal @db.Decimal(78, 0)
+  created_at_block    Decimal @db.Decimal(78, 0)
+  total_funds_managed Decimal @db.Decimal(78, 0)
+
+  @@map("manager_onchain")
+}
+
+model ManagerMetadata {
+  id                    Int      @id
+  description           String?
+  experienceYears       Int?
+  maxProfitAPY          Decimal? @db.Decimal(5, 2)
+  riskLevel             String?  @db.VarChar(10)
+  strategy              String?
+  assetsUnderManagement Decimal? @db.Decimal(20, 2)
+  totalClients          Int?
+
+  @@map("manager_metadata")
+}
+
+model ManagerAllocation {
+  id                    String  @id
+  manager_address       String
+  project_token_address String
+  token_balance         Decimal @db.Decimal(78, 0)
+  last_updated          Decimal @db.Decimal(78, 0)
+
+  @@map("manager_allocation")
+}
+
 model TransactionLogs {
   id               String  @id
   contract_address String
+  related_address  String?
   user             String
   type             String
-  token_amount     Decimal @db.Decimal(78, 0)
-  usdt_amount      Decimal @db.Decimal(78, 0)
+  amount_in        Decimal @db.Decimal(78, 0)
+  amount_out       Decimal @db.Decimal(78, 0)
   timestamp        Decimal @db.Decimal(78, 0)
   block_number     Decimal @db.Decimal(78, 0)
   transaction_hash String
@@ -72,6 +122,7 @@ model reorg__ownership {
   id                 String
   contract_address   String
   user               String
+  type               String
   balance            Decimal @db.Decimal(78, 0)
   last_updated       Decimal @db.Decimal(78, 0)
   last_updated_block Decimal @db.Decimal(78, 0)
@@ -108,10 +159,11 @@ model reorg__product_onchain {
 model reorg__transaction_logs {
   id               String
   contract_address String
+  related_address  String?
   user             String
   type             String
-  token_amount     Decimal @db.Decimal(78, 0)
-  usdt_amount      Decimal @db.Decimal(78, 0)
+  amount_in        Decimal @db.Decimal(78, 0)
+  amount_out       Decimal @db.Decimal(78, 0)
   timestamp        Decimal @db.Decimal(78, 0)
   block_number     Decimal @db.Decimal(78, 0)
   transaction_hash String
@@ -157,4 +209,35 @@ model Product {
   contract     Contract @relation(fields: [contractId], references: [id])
 
   @@map("products")
+}
+
+model reorg__manager_allocation {
+  id                    String
+  manager_address       String
+  project_token_address String
+  token_balance         Decimal @db.Decimal(78, 0)
+  last_updated          Decimal @db.Decimal(78, 0)
+  operation_id          Int     @id @default(autoincrement())
+  operation             Int
+  checkpoint            String  @db.VarChar(75)
+
+  @@index([checkpoint], map: "manager_allocation_checkpoint_index")
+  @@map("_reorg__manager_allocation")
+}
+
+model reorg__manager_onchain {
+  id                  String
+  sequence_id         Decimal @db.Decimal(78, 0)
+  contract_address    String
+  name                String
+  owner               String
+  created_at          Decimal @db.Decimal(78, 0)
+  created_at_block    Decimal @db.Decimal(78, 0)
+  total_funds_managed Decimal @db.Decimal(78, 0)
+  operation_id        Int     @id @default(autoincrement())
+  operation           Int
+  checkpoint          String  @db.VarChar(75)
+
+  @@index([checkpoint], map: "manager_onchain_checkpoint_index")
+  @@map("_reorg__manager_onchain")
 }
