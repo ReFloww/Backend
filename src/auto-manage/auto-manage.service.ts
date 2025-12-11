@@ -41,4 +41,42 @@ export class AutoManageService {
 
         return managerList;
     }
+
+    async getManagerById(id: string) {
+        // Get manager_onchain record by ID
+        const onchain = await this.prisma.managerOnchain.findUnique({
+            where: { id },
+        });
+
+        if (!onchain) {
+            return null;
+        }
+
+        // Get metadata
+        const metadata = await this.prisma.managerMetadata.findUnique({
+            where: { id: parseInt(onchain.sequence_id.toString()) },
+        });
+
+        return {
+            // Onchain data
+            id: onchain.id,
+            sequenceId: onchain.sequence_id,
+            contractAddress: onchain.contract_address,
+            name: onchain.name,
+            owner: onchain.owner,
+            createdAt: onchain.created_at,
+            createdAtBlock: onchain.created_at_block,
+            totalFundsManaged: onchain.total_funds_managed,
+
+            // Metadata
+            description: metadata?.description || null,
+            experienceYears: metadata?.experienceYears || null,
+            maxProfitLAPY: metadata?.maxProfitAPY || null,
+            riskLevel: metadata?.riskLevel || null,
+            strategy: metadata?.strategy || null,
+            assetUnderManagement: metadata?.assetsUnderManagement || null,
+            totalClients: metadata?.totalClients || null,
+        };
+    }
 }
+

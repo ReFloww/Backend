@@ -68,16 +68,9 @@ export class MarketService {
                 return {
                     // Onchain data
                     id: onchain.id,
-                    sequenceId: onchain.sequence_id,
                     contractAddress: onchain.contract_address,
                     name: onchain.name,
                     symbol: onchain.symbol,
-                    maxSupply: onchain.max_supply,
-                    totalSupply: onchain.total_supply,
-                    factoryAddress: onchain.factory_address,
-                    createdAt: onchain.created_at,
-                    createdAtBlock: onchain.created_at_block,
-                    createdAtTransaction: onchain.created_at_transaction,
                     holderCount: onchain.holder_count,
 
                     // Metadata
