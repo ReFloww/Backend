@@ -108,19 +108,20 @@ model TransactionLogs {
 }
 
 model RepaymentLogs {
-  id                  String  @id
-  contract_address    String
-  repayment_number    Decimal @db.Decimal(78, 0)
-  principal_paid      Decimal @db.Decimal(78, 0)
-  interest_paid       Decimal @db.Decimal(78, 0)
-  total_distributed   Decimal @db.Decimal(78, 0)
-  remaining_principal Decimal @db.Decimal(78, 0)
-  timestamp           Decimal @db.Decimal(78, 0)
-  block_number        Decimal @db.Decimal(78, 0)
-  transaction_hash    String
+  id                   String  @id
+  contract_address     String
+  repayment_number     Decimal @db.Decimal(78, 0)
+  principal_paid       Decimal @db.Decimal(78, 0)
+  interest_paid        Decimal @db.Decimal(78, 0)
+  total_distributed    Decimal @db.Decimal(78, 0)
+  remaining_principal  Decimal @db.Decimal(78, 0)
+  timestamp            Decimal @db.Decimal(78, 0)
+  block_number         Decimal @db.Decimal(78, 0)
+  transaction_hash     String
 
   @@map("repayment_logs")
 }
+
 
 model ponder_checkpoint {
   chain_name           String @id
