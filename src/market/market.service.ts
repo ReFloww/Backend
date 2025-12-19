@@ -67,11 +67,12 @@ export class MarketService {
 
                 return {
                     // Onchain data
-                    id: onchain.id,
+                    id: onchain.sequence_id.toString(),
                     contractAddress: onchain.contract_address,
                     name: onchain.name,
                     symbol: onchain.symbol,
                     holderCount: onchain.holder_count,
+                    status: onchain.status,
 
                     // Metadata
                     description: metadata?.description || null,
@@ -85,5 +86,43 @@ export class MarketService {
         );
 
         return marketList;
+    }
+
+    async getMarketProductById(id: string) {
+        // Find product onchain by sequence_id
+        const productOnchain = await this.prisma.productOnchain.findFirst({
+            where: {
+                sequence_id: {
+                    equals: parseInt(id)
+                }
+            }
+        });
+
+        if (!productOnchain) {
+            throw new NotFoundException(`Product with ID ${id} not found`);
+        }
+
+        const metadata = await this.prisma.productMetadata.findUnique({
+            where: { id: parseInt(productOnchain.sequence_id.toString()) },
+        });
+
+        return {
+            // Onchain data
+            id: productOnchain.sequence_id.toString(),
+            contractAddress: productOnchain.contract_address,
+            name: productOnchain.name,
+            symbol: productOnchain.symbol,
+            holderCount: productOnchain.holder_count,
+            status: productOnchain.status,
+
+            // Metadata
+            description: metadata?.description || null,
+            loanInterest: metadata?.loanInterest || null,
+            loanAmount: metadata?.loanAmount || null,
+            creditRate: metadata?.creditRate || null,
+            categoryId: metadata?.categoryId || null,
+            loanTenor: metadata?.loanTenor || null,
+            tokenP2PAddress: productOnchain.contract_address,
+        };
     }
 }

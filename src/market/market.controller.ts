@@ -57,4 +57,17 @@ export class MarketController {
     getMarketList() {
         return this.marketService.getMarketList();
     }
+
+    @Get(':id')
+    @ApiOperation({ summary: 'Get market product by ID (Sequence ID)' })
+    @ApiParam({ name: 'id', description: 'Product Sequence ID' })
+    @ApiResponse({
+        status: 200,
+        description: 'Return the product with onchain and metadata combined.',
+        type: MarketListResponseDto
+    })
+    @ApiResponse({ status: 404, description: 'Product not found.' })
+    getMarketProductById(@Param('id') id: string) {
+        return this.marketService.getMarketProductById(id);
+    }
 }

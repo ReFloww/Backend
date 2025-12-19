@@ -33,6 +33,12 @@ model ProductOnchain {
   created_at_block       Decimal @db.Decimal(78, 0)
   created_at_transaction String
   holder_count           Decimal @db.Decimal(78, 0)
+  tenor                  Decimal @db.Decimal(78, 0)
+  interest_rate_bps      Decimal @db.Decimal(78, 0)
+  borrower               String
+  remaining_principal    Decimal @db.Decimal(78, 0)
+  repayment_count        Decimal @db.Decimal(78, 0)
+  status                 String
 
   @@map("product_onchain")
 }
@@ -148,6 +154,12 @@ model reorg__product_onchain {
   created_at_block       Decimal @db.Decimal(78, 0)
   created_at_transaction String
   holder_count           Decimal @db.Decimal(78, 0)
+  tenor                  Decimal @db.Decimal(78, 0)
+  interest_rate_bps      Decimal @db.Decimal(78, 0)
+  borrower               String
+  remaining_principal    Decimal @db.Decimal(78, 0)
+  repayment_count        Decimal @db.Decimal(78, 0)
+  status                 String
   operation_id           Int     @id @default(autoincrement())
   operation              Int
   checkpoint             String  @db.VarChar(75)

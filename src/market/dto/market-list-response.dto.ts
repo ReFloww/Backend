@@ -17,6 +17,9 @@ export class MarketListResponseDto {
     @ApiProperty({ description: 'Number of token holders' })
     holderCount: Decimal;
 
+    @ApiProperty({ description: 'Product status' })
+    status: string;
+
     // Metadata fields
     @ApiProperty({ description: 'Product description', required: false, nullable: true })
     description: string | null;
