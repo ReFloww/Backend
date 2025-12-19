@@ -115,6 +115,10 @@ export class MarketService {
             holderCount: productOnchain.holder_count,
             status: productOnchain.status,
 
+            // Repayment data
+            remainingPrincipal: productOnchain.remaining_principal.toString(),
+            repaymentCount: productOnchain.repayment_count.toString(),
+
             // Metadata
             description: metadata?.description || null,
             loanInterest: metadata?.loanInterest || null,
@@ -124,5 +128,39 @@ export class MarketService {
             loanTenor: metadata?.loanTenor || null,
             tokenP2PAddress: productOnchain.contract_address,
         };
+    }
+
+    async getRepaymentRecords(id: string) {
+        // Find product onchain by sequence_id to get contract address
+        const productOnchain = await this.prisma.productOnchain.findFirst({
+            where: {
+                sequence_id: {
+                    equals: parseInt(id)
+                }
+            }
+        });
+
+        if (!productOnchain) {
+            throw new NotFoundException(`Product with ID ${id} not found`);
+        }
+
+        // Get repayment records from repayment_logs table
+        const repaymentLogs = await this.prisma.repaymentLogs.findMany({
+            where: {
+                contract_address: productOnchain.contract_address,
+            },
+            orderBy: {
+                repayment_number: 'asc',
+            },
+        });
+
+        // Map to response format
+        return repaymentLogs.map((log) => ({
+            repaymentNumber: log.repayment_number.toString(),
+            principal: log.principal_paid.toString(),
+            interestPaid: log.interest_paid.toString(),
+            timestamp: log.timestamp.toString(),
+            transactionHash: log.transaction_hash,
+        }));
     }
 }
