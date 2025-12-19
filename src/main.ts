@@ -7,7 +7,7 @@ import { apiReference } from '@scalar/nestjs-api-reference';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
-    app.setGlobalPrefix('v1/api');
+    app.setGlobalPrefix('api/v1');
 
     app.enableCors();
     app.useGlobalPipes(
