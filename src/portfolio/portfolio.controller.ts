@@ -1,12 +1,14 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { PortfolioService } from './portfolio.service';
 
 @Controller('portfolio')
 export class PortfolioController {
-    constructor(private readonly portfolioService: PortfolioService) {}
+  constructor(private readonly portfolioService: PortfolioService) {}
 
-    @Get('/data')
-    getPortfolio() {
-        return this.portfolioService.getPortfolioData();
-    }
+  @Get()
+  async getPortfolio(@Query('wallet') wallet?: string) {
+    // sementara kalau wallet tidak dikirim, pakai mock
+    const walletAddress = wallet ?? '0xMOCK_USER_WALLET';
+    return this.portfolioService.getPortfolio(walletAddress);
+  }
 }
