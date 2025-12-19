@@ -58,6 +58,18 @@ export class MarketController {
         return this.marketService.getMarketList();
     }
 
+    @Get(':id/repayments')
+    @ApiOperation({ summary: 'Get repayment records for a product' })
+    @ApiParam({ name: 'id', description: 'Product Sequence ID' })
+    @ApiResponse({
+        status: 200,
+        description: 'Return repayment records for the product.',
+    })
+    @ApiResponse({ status: 404, description: 'Product not found.' })
+    getRepaymentRecords(@Param('id') id: string) {
+        return this.marketService.getRepaymentRecords(id);
+    }
+
     @Get(':id')
     @ApiOperation({ summary: 'Get market product by ID (Sequence ID)' })
     @ApiParam({ name: 'id', description: 'Product Sequence ID' })
