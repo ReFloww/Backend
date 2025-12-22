@@ -65,7 +65,9 @@ model ManagerOnchain {
   created_at_block Decimal @db.Decimal(78, 0)
   total_shares     Decimal @db.Decimal(78, 0)
   aum              Decimal @db.Decimal(78, 0)
-  share_price      Decimal @db.Decimal(78, 0)
+  share_price       Decimal @db.Decimal(78, 0)
+  locked_fund_value Decimal @db.Decimal(78, 0)
+  liquid_fund_value Decimal @db.Decimal(78, 0)
 
   @@map("manager_onchain")
 }
@@ -265,7 +267,9 @@ model reorg__manager_onchain {
   created_at_block Decimal @db.Decimal(78, 0)
   total_shares     Decimal @db.Decimal(78, 0)
   aum              Decimal @db.Decimal(78, 0)
-  share_price      Decimal @db.Decimal(78, 0)
+  share_price       Decimal @db.Decimal(78, 0)
+  locked_fund_value Decimal @db.Decimal(78, 0)
+  liquid_fund_value Decimal @db.Decimal(78, 0)
   operation_id     Int     @id @default(autoincrement())
   operation        Int
   checkpoint       String  @db.VarChar(75)

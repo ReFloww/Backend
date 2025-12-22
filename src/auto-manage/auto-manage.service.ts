@@ -29,6 +29,8 @@ export class AutoManageService {
                     aum: onchain.aum,
                     totalShares: onchain.total_shares,
                     sharePrice: onchain.share_price,
+                    lockedFundValue: onchain.locked_fund_value,
+                    liquidFundValue: onchain.liquid_fund_value,
 
                     // Metadata
                     description: metadata?.description || null,
@@ -73,6 +75,8 @@ export class AutoManageService {
             aum: onchain.aum,
             totalShares: onchain.total_shares,
             sharePrice: onchain.share_price,
+            lockedFundValue: onchain.locked_fund_value,
+            liquidFundValue: onchain.liquid_fund_value,
 
             // Metadata
             description: metadata?.description || null,
