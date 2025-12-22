@@ -25,7 +25,10 @@ export class AutoManageService {
                     owner: onchain.owner,
                     createdAt: onchain.created_at,
                     createdAtBlock: onchain.created_at_block,
-                    totalFundsManaged: onchain.total_funds_managed,
+                    totalFundsManaged: onchain.aum, // Backward compatibility
+                    aum: onchain.aum,
+                    totalShares: onchain.total_shares,
+                    sharePrice: onchain.share_price,
 
                     // Metadata
                     description: metadata?.description || null,
@@ -66,7 +69,10 @@ export class AutoManageService {
             owner: onchain.owner,
             createdAt: onchain.created_at,
             createdAtBlock: onchain.created_at_block,
-            totalFundsManaged: onchain.total_funds_managed,
+            totalFundsManaged: onchain.aum, // Backward compatibility
+            aum: onchain.aum,
+            totalShares: onchain.total_shares,
+            sharePrice: onchain.share_price,
 
             // Metadata
             description: metadata?.description || null,

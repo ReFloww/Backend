@@ -56,14 +56,16 @@ model ProductMetadata {
 }
 
 model ManagerOnchain {
-  id                  String  @id
-  sequence_id         Decimal @db.Decimal(78, 0)
-  contract_address    String
-  name                String
-  owner               String
-  created_at          Decimal @db.Decimal(78, 0)
-  created_at_block    Decimal @db.Decimal(78, 0)
-  total_funds_managed Decimal @db.Decimal(78, 0)
+  id               String  @id
+  sequence_id      Decimal @db.Decimal(78, 0)
+  contract_address String
+  name             String
+  owner            String
+  created_at       Decimal @db.Decimal(78, 0)
+  created_at_block Decimal @db.Decimal(78, 0)
+  total_shares     Decimal @db.Decimal(78, 0)
+  aum              Decimal @db.Decimal(78, 0)
+  share_price      Decimal @db.Decimal(78, 0)
 
   @@map("manager_onchain")
 }
@@ -254,17 +256,19 @@ model reorg__manager_allocation {
 }
 
 model reorg__manager_onchain {
-  id                  String
-  sequence_id         Decimal @db.Decimal(78, 0)
-  contract_address    String
-  name                String
-  owner               String
-  created_at          Decimal @db.Decimal(78, 0)
-  created_at_block    Decimal @db.Decimal(78, 0)
-  total_funds_managed Decimal @db.Decimal(78, 0)
-  operation_id        Int     @id @default(autoincrement())
-  operation           Int
-  checkpoint          String  @db.VarChar(75)
+  id               String
+  sequence_id      Decimal @db.Decimal(78, 0)
+  contract_address String
+  name             String
+  owner            String
+  created_at       Decimal @db.Decimal(78, 0)
+  created_at_block Decimal @db.Decimal(78, 0)
+  total_shares     Decimal @db.Decimal(78, 0)
+  aum              Decimal @db.Decimal(78, 0)
+  share_price      Decimal @db.Decimal(78, 0)
+  operation_id     Int     @id @default(autoincrement())
+  operation        Int
+  checkpoint       String  @db.VarChar(75)
 
   @@index([checkpoint], map: "manager_onchain_checkpoint_index")
   @@map("_reorg__manager_onchain")
