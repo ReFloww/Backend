@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { BlockchainService } from '../blockchain/blockchain.service';
 
 @Injectable()
 export class AutoManageService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private blockchain: BlockchainService,
+    ) {}
 
     async getManagerList() {
-        // Get all manager_onchain records
         const managersOnchain = await this.prisma.managerOnchain.findMany();
 
-        // For each manager, join with metadata
         const managerList = await Promise.all(
             managersOnchain.map(async (onchain) => {
                 const metadata = await this.prisma.managerMetadata.findUnique({
@@ -17,7 +19,6 @@ export class AutoManageService {
                 });
 
                 return {
-                    // Onchain data
                     id: onchain.id,
                     sequenceId: onchain.sequence_id,
                     contractAddress: onchain.contract_address,
@@ -25,14 +26,12 @@ export class AutoManageService {
                     owner: onchain.owner,
                     createdAt: onchain.created_at,
                     createdAtBlock: onchain.created_at_block,
-                    totalFundsManaged: onchain.aum, // Backward compatibility
+                    totalFundsManaged: onchain.aum,
                     aum: onchain.aum,
                     totalShares: onchain.total_shares,
                     sharePrice: onchain.share_price,
                     lockedFundValue: onchain.locked_fund_value,
                     liquidFundValue: onchain.liquid_fund_value,
-
-                    // Metadata
                     description: metadata?.description || null,
                     experienceYears: metadata?.experienceYears || null,
                     maxProfitLAPY: metadata?.maxProfitAPY || null,
@@ -48,7 +47,6 @@ export class AutoManageService {
     }
 
     async getManagerById(id: string) {
-        // Get manager_onchain record by ID
         const onchain = await this.prisma.managerOnchain.findUnique({
             where: { id },
         });
@@ -57,13 +55,11 @@ export class AutoManageService {
             return null;
         }
 
-        // Get metadata
         const metadata = await this.prisma.managerMetadata.findUnique({
             where: { id: parseInt(onchain.sequence_id.toString()) },
         });
 
         return {
-            // Onchain data
             id: onchain.id,
             sequenceId: onchain.sequence_id,
             contractAddress: onchain.contract_address,
@@ -71,14 +67,12 @@ export class AutoManageService {
             owner: onchain.owner,
             createdAt: onchain.created_at,
             createdAtBlock: onchain.created_at_block,
-            totalFundsManaged: onchain.aum, // Backward compatibility
+            totalFundsManaged: onchain.aum,
             aum: onchain.aum,
             totalShares: onchain.total_shares,
             sharePrice: onchain.share_price,
             lockedFundValue: onchain.locked_fund_value,
             liquidFundValue: onchain.liquid_fund_value,
-
-            // Metadata
             description: metadata?.description || null,
             experienceYears: metadata?.experienceYears || null,
             maxProfitLAPY: metadata?.maxProfitAPY || null,
@@ -88,5 +82,50 @@ export class AutoManageService {
             totalClients: metadata?.totalClients || null,
         };
     }
-}
 
+    async getUserManagerInvestments(wallet: string) {
+        const managersOnchain = await this.prisma.managerOnchain.findMany();
+
+        const investments = await Promise.all(
+            managersOnchain.map(async (onchain) => {
+                const userDeposit = await this.blockchain.getManagerDeposit(wallet);
+                const totalDeposits = await this.blockchain.getTotalDeposits(onchain.contract_address);
+                const metadata = await this.prisma.managerMetadata.findUnique({
+                    where: { id: parseInt(onchain.sequence_id.toString()) },
+                });
+
+                const depositAmount = parseFloat(userDeposit.toString()) / 1000000;
+                const totalDepositValue = parseFloat(totalDeposits.toString()) / 1000000;
+                const sharePercentage = totalDepositValue > 0 ? (depositAmount / totalDepositValue) * 100 : 0;
+
+                return {
+                    managerAddress: onchain.contract_address,
+                    managerName: onchain.name,
+                    depositAmount,
+                    rawDepositAmount: userDeposit.toString(),
+                    totalDeposits: totalDepositValue,
+                    sharePercentage,
+                    sharePrice: onchain.share_price,
+                    metadata: metadata
+                        ? {
+                              description: metadata.description,
+                              experienceYears: metadata.experienceYears,
+                              maxProfitAPY: metadata.maxProfitAPY,
+                              riskLevel: metadata.riskLevel,
+                              strategy: metadata.strategy,
+                              totalClients: metadata.totalClients,
+                          }
+                        : undefined,
+                };
+            })
+        );
+
+        const userInvestments = investments.filter((inv) => inv.depositAmount > 0);
+        const totalInvested = userInvestments.reduce((sum, inv) => sum + inv.depositAmount, 0);
+
+        return {
+            investments: userInvestments,
+            totalInvested,
+        };
+    }
+}

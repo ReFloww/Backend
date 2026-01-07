@@ -12,7 +12,6 @@ const erc20Abi = [
   },
 ] as const;
 
-// ABI sederhana untuk ManagerInvestment.userDeposits
 const managerInvestmentAbi = [
   {
     name: 'userDeposits',
@@ -21,13 +20,19 @@ const managerInvestmentAbi = [
     inputs: [{ name: 'user', type: 'address' }],
     outputs: [{ name: 'amount', type: 'uint256' }],
   },
+  {
+    name: 'totalDeposits',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: 'amount', type: 'uint256' }],
+  },
 ] as const;
 
 @Injectable()
 export class BlockchainService implements OnModuleInit {
   private publicClient: any;
 
-  // alamat kontrak di Mantle Sepolia
   private readonly usdtAddress =
     '0xe01c5464816a544d4d0d6a336032578bd4629F10';
 
@@ -41,9 +46,7 @@ export class BlockchainService implements OnModuleInit {
     });
   }
 
-  // --- method lamamu, tetap ada ---
   async getContractInfo(contractAddress: string) {
-    // Masih mock, kalau mau bisa di-upgrade nanti
     return {
       address: contractAddress,
       balance: '0',
@@ -54,10 +57,6 @@ export class BlockchainService implements OnModuleInit {
   getClient() {
     return this.publicClient;
   }
-
-  // ===============================
-  // USDT & Manager Investment helpers
-  // ===============================
 
   async getUsdtWalletBalance(wallet: string): Promise<bigint> {
     const balance = await this.publicClient.readContract({
@@ -80,5 +79,26 @@ export class BlockchainService implements OnModuleInit {
 
     return deposit as bigint;
   }
+
+  async getManagerDepositForAddress(managerAddress: string, wallet: string): Promise<bigint> {
+    const deposit = await this.publicClient.readContract({
+      address: managerAddress as `0x${string}`,
+      abi: managerInvestmentAbi,
+      functionName: 'userDeposits',
+      args: [wallet],
+    });
+
+    return deposit as bigint;
+  }
+
+  async getTotalDeposits(managerAddress: string): Promise<bigint> {
+    const totalDeposits = await this.publicClient.readContract({
+      address: managerAddress as `0x${string}`,
+      abi: managerInvestmentAbi,
+      functionName: 'totalDeposits',
+      args: [],
+    });
+
+    return totalDeposits as bigint;
+  }
 }
- 
