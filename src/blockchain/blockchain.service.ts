@@ -36,8 +36,7 @@ export class BlockchainService implements OnModuleInit {
   private readonly usdtAddress =
     '0xe01c5464816a544d4d0d6a336032578bd4629F10';
 
-  private readonly managerInvestmentAddress =
-    '0x0e5e7fc419fe944fa3ed1db55958f81e13c26727';
+
 
   onModuleInit() {
     this.publicClient = createPublicClient({
