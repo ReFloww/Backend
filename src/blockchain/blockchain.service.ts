@@ -1,6 +1,32 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { createPublicClient, http } from 'viem';
-import { mantleTestnet } from 'viem/chains';
+import { createPublicClient, http, defineChain } from 'viem';
+
+// Define Mantle Sepolia chain with correct RPC endpoint
+const mantleSepolia = defineChain({
+  id: 5003,
+  name: 'Mantle Sepolia Testnet',
+  network: 'mantle-sepolia',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'MNT',
+    symbol: 'MNT',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.sepolia.mantle.xyz'],
+    },
+    public: {
+      http: ['https://rpc.sepolia.mantle.xyz'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Mantle Sepolia Explorer',
+      url: 'https://sepolia.mantlescan.xyz',
+    },
+  },
+  testnet: true,
+});
 
 const erc20Abi = [
   {
@@ -40,9 +66,10 @@ export class BlockchainService implements OnModuleInit {
 
   onModuleInit() {
     this.publicClient = createPublicClient({
-      chain: mantleTestnet,
-      transport: http(),
+      chain: mantleSepolia, // Use custom Mantle Sepolia config
+      transport: http('https://rpc.sepolia.mantle.xyz'), // Explicit RPC URL
     });
+    console.log('✅ Blockchain service initialized with Mantle Sepolia RPC');
   }
 
   async getContractInfo(contractAddress: string) {
@@ -68,9 +95,13 @@ export class BlockchainService implements OnModuleInit {
     return balance as bigint;
   }
 
+  /**
+   * @deprecated This method is INCORRECT - it uses wallet address as contract address
+   * Use getManagerDepositForAddress(managerAddress, wallet) instead
+   */
   async getManagerDeposit(wallet: string): Promise<bigint> {
     const deposit = await this.publicClient.readContract({
-      address: this.managerInvestmentAddress,
+      address: wallet as `0x${string}`,
       abi: managerInvestmentAbi,
       functionName: 'userDeposits',
       args: [wallet],

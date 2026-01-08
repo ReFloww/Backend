@@ -15,13 +15,16 @@ export class PortfolioService {
   constructor(
     private prisma: PrismaService,
     private blockchain: BlockchainService,
-  ) {}
+  ) { }
 
   async getPortfolio(walletAddress: string) {
     const [ownerships, usdtBalance] = await Promise.all([
       this.prisma.ownership.findMany({
         where: {
           user: walletAddress,
+          type: {
+            not: 'SHARE', // Exclude manager shares from P2P portfolio
+          },
           balance: {
             gt: new Prisma.Decimal(0),
           },
@@ -100,15 +103,18 @@ export class PortfolioService {
   }
 
   private async getTotalUsdtBalance(wallet: string): Promise<number> {
-    const [walletRaw, managerRaw] = await Promise.all([
-      this.blockchain.getUsdtWalletBalance(wallet),
-      this.blockchain.getManagerDeposit(wallet),
-    ]);
+    try {
+      // Only get wallet USDT balance
+      // Manager deposits are calculated separately in Manager Investment section
+      const walletRaw = await this.blockchain.getUsdtWalletBalance(wallet);
 
-    const totalRaw = walletRaw + managerRaw; 
+      const balance = Number(walletRaw) / 1e6;
 
-    const balance = Number(totalRaw) / 1e6;
-
-    return balance;
+      return balance;
+    } catch (error) {
+      console.warn(`Failed to fetch USDT balance for wallet ${wallet}:`, error.message);
+      // Return 0 if blockchain call fails, don't crash the entire API
+      return 0;
+    }
   }
 }

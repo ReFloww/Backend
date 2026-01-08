@@ -7,7 +7,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/
 @ApiTags('Investment-Funds')
 @Controller('investment-funds')
 export class AutoManageController {
-    constructor(private readonly autoManageService: AutoManageService) {}
+    constructor(private readonly autoManageService: AutoManageService) { }
 
     @Get('list')
     @ApiOperation({ summary: 'Get investment-funds list with combined manager data' })
@@ -52,6 +52,6 @@ export class AutoManageController {
         if (!wallet) {
             throw new NotFoundException('Wallet address is required');
         }
-        return this.autoManageService.getUserManagerInvestments(wallet);
+        return this.autoManageService.getUserManagerInvestments(wallet.toLowerCase());
     }
 }
