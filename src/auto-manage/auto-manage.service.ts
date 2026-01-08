@@ -116,37 +116,37 @@ export class AutoManageService {
 
         // Early return if no valid manager contracts found
         if (managersOnchain.length === 0) {
-            console.log(`No manager contracts found for ${ownedContractAddresses.length} owned contract addresses`);
             return {
                 investments: [],
                 totalInvested: 0,
             };
         }
 
-        console.log(`Found ${managersOnchain.length} manager contracts for wallet ${wallet}`);
-
         const investments: Array<{
-            managerAddress: string;
-            managerName: string;
-            depositAmount: number;
-            rawDepositAmount: string;
-            totalDeposits: number;
-            sharePercentage: number;
-            sharePrice: number;
+            managerId: string;
+            assetName: string;
+            sector: string;
+            balanceTokens: number;
             valueUsdt: number;
+            returnPct: number;
+            sharePercentage?: number;
             metadata?: {
-                description: string;
-                experienceYears: number;
-                maxProfitAPY: number;
-                riskLevel: string;
-                strategy: string;
-                totalClients: number;
+                description?: string;
+                experienceYears?: number;
+                strategy?: string;
+                totalClients?: number;
             };
         }> = [];
 
         let totalInvested = 0;
 
         if (managersOnchain.length > 0) {
+            // Create ownership map for efficient lookup
+            const ownershipMap = new Map();
+            ownerships.forEach(own => {
+                ownershipMap.set(own.contract_address, own);
+            });
+
             const sequenceIds = managersOnchain.map(m => parseInt(m.sequence_id.toString()));
 
             const metadataList = await this.prisma.managerMetadata.findMany({
@@ -157,22 +157,29 @@ export class AutoManageService {
 
             for (const onchain of managersOnchain) {
                 try {
-                    const userDeposit = await this.blockchain.getManagerDepositForAddress(
-                        onchain.contract_address,
-                        wallet
-                    );
-                    const totalDeposits = await this.blockchain.getTotalDeposits(onchain.contract_address);
+                    // Get ownership data from database instead of blockchain
+                    const ownership = ownershipMap.get(onchain.contract_address);
+                    if (!ownership) {
+                        console.warn(`No ownership found for manager ${onchain.contract_address}`);
+                        continue;
+                    }
 
-                    const depositAmount = parseFloat(userDeposit.toString()) / 1000000;
+                    // Calculate balance from ownership (shares owned by user)
+                    const shareBalance = parseFloat(ownership.balance.toString()) / 1000000;
 
-                    // Skip if user has no deposit in this manager
-                    if (depositAmount === 0) continue;
+                    // Skip if user has no shares
+                    if (shareBalance === 0) continue;
 
-                    const totalDepositValue = parseFloat(totalDeposits.toString()) / 1000000;
-                    const sharePercentage = totalDepositValue > 0 ? (depositAmount / totalDepositValue) * 100 : 0;
-
+                    // Get manager data from database
+                    const totalShares = parseFloat(onchain.total_shares.toString()) / 1000000;
                     const sharePriceValue = parseFloat(onchain.share_price.toString()) / 1000000;
-                    const valueUsdt = depositAmount * sharePriceValue;
+                    const aum = parseFloat(onchain.aum.toString()) / 1000000;
+
+                    // Calculate share percentage
+                    const sharePercentage = totalShares > 0 ? (shareBalance / totalShares) * 100 : 0;
+
+                    // Calculate value in USDT
+                    const valueUsdt = shareBalance * sharePriceValue;
 
                     totalInvested += valueUsdt;
 
@@ -181,28 +188,24 @@ export class AutoManageService {
                     );
 
                     investments.push({
-                        managerAddress: onchain.contract_address,
-                        managerName: onchain.name,
-                        depositAmount,
-                        rawDepositAmount: userDeposit.toString(),
-                        totalDeposits: totalDepositValue,
-                        sharePercentage,
-                        sharePrice: sharePriceValue,
+                        managerId: onchain.contract_address,
+                        assetName: onchain.name,
+                        sector: metadata?.riskLevel || 'Unknown',
+                        balanceTokens: shareBalance,
                         valueUsdt,
+                        returnPct: metadata?.maxProfitAPY ? parseFloat(metadata.maxProfitAPY.toString()) : 0,
+                        sharePercentage,
                         metadata: metadata
                             ? {
                                 description: metadata.description,
                                 experienceYears: metadata.experienceYears,
-                                maxProfitAPY: parseFloat(metadata.maxProfitAPY?.toString() || '0'),
-                                riskLevel: metadata.riskLevel,
                                 strategy: metadata.strategy,
                                 totalClients: metadata.totalClients,
                             }
                             : undefined,
                     });
                 } catch (error) {
-                    // Skip this manager if blockchain call fails (invalid contract, RPC error, etc.)
-                    console.warn(`Failed to fetch data for manager ${onchain.contract_address}:`, error.message);
+                    console.warn(`Failed to process manager ${onchain.contract_address}:`, error.message);
                     continue;
                 }
             }

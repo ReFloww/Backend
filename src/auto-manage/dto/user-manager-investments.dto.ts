@@ -1,41 +1,40 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class UserManagerInvestmentResponseDto {
-  @ApiProperty({ description: 'Manager contract address' })
-  managerAddress: string;
+// UPDATED: Match P2P Lending format
+export class ManagerInvestmentAssetDto {
+  @ApiProperty({ description: 'Manager contract address (like productId)' })
+  managerId: string;
 
-  @ApiProperty({ description: 'Manager name' })
-  managerName: string;
+  @ApiProperty({ description: 'Manager name (Asset column)' })
+  assetName: string;
 
-  @ApiProperty({ description: 'Deposit amount in USDT' })
-  depositAmount: number;
+  @ApiProperty({ description: 'Risk level or strategy (Sector column)' })
+  sector: string;
 
-  @ApiProperty({ description: 'Raw deposit amount in Wei' })
-  rawDepositAmount: string;
+  @ApiProperty({ description: 'Share balance in tokens (Balance column)' })
+  balanceTokens: number;
 
-  @ApiProperty({ description: 'Total deposits in manager' })
-  totalDeposits: number;
+  @ApiProperty({ description: 'Value in USDT (Value column)' })
+  valueUsdt: number;
 
-  @ApiProperty({ description: 'Share percentage of manager' })
-  sharePercentage: number;
+  @ApiProperty({ description: 'Return percentage APY (Return column)' })
+  returnPct: number;
 
-  @ApiPropertyOptional({ description: 'Share price from smart contract' })
-  sharePrice?: string;
+  @ApiPropertyOptional({ description: 'Share percentage of total AUM' })
+  sharePercentage?: number;
 
-  @ApiPropertyOptional({ description: 'Manager metadata' })
+  @ApiPropertyOptional({ description: 'Manager metadata for additional info' })
   metadata?: {
     description?: string;
     experienceYears?: number;
-    maxProfitAPY?: string;
-    riskLevel?: string;
     strategy?: string;
     totalClients?: number;
   };
 }
 
 export class UserManagerInvestmentsListResponseDto {
-  @ApiProperty({ description: 'User investments in managers', type: [UserManagerInvestmentResponseDto] })
-  investments: UserManagerInvestmentResponseDto[];
+  @ApiProperty({ description: 'User investments in managers (as assets)', type: [ManagerInvestmentAssetDto] })
+  investments: ManagerInvestmentAssetDto[];
 
   @ApiProperty({ description: 'Total invested across all managers' })
   totalInvested: number;
